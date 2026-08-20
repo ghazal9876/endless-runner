@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Night Flight — Endless Runner</title>
+  <style>
+    :root { color-scheme: dark; font-family: Inter, ui-sans-serif, system-ui, sans-serif; }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; display: grid; place-items: center; overflow: hidden; background: #050a18; color: #f7fbff; }
+    .shell { width: min(1100px, 100vw); padding: 18px; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+    .brand { letter-spacing: .18em; text-transform: uppercase; font-size: 12px; color: #9fb0d2; font-weight: 800; }
+    .score { font-variant-numeric: tabular-nums; font-size: 18px; font-weight: 800; }
+    .score span { color: #72e2ff; }
+    .game-wrap { position: relative; border: 1px solid #26365d; border-radius: 18px; overflow: hidden; box-shadow: 0 22px 70px #0008, inset 0 0 80px #1d315b55; background: #08132d; }
+    canvas { width: 100%; height: min(70vh, 650px); min-height: 420px; display: block; cursor: pointer; }
+    .hint { position: absolute; left: 50%; bottom: 22px; transform: translateX(-50%); color: #c9d9f7; font-size: 13px; white-space: nowrap; opacity: .76; pointer-events: none; }
+    .panel { position: absolute; inset: 0; display: grid; place-items: center; background: #04081799; backdrop-filter: blur(5px); }
+    .card { text-align: center; padding: 26px 34px; border: 1px solid #6788c955; border-radius: 16px; background: #0a1530dd; box-shadow: 0 10px 35px #0007; }
+    h1 { margin: 0 0 8px; font-size: clamp(28px, 5vw, 48px); letter-spacing: -.05em; }
+    .card p { margin: 0 0 18px; color: #afc0df; }
+    button { border: 0; border-radius: 999px; padding: 11px 20px; color: #05101d; background: #72e2ff; font-weight: 900; cursor: pointer; }
+    button:hover { background: #b8f2ff; transform: translateY(-1px); }
+    .mobile-controls { display: none; }
+    @media (max-width: 600px) { .shell { padding: 10px; } canvas { min-height: 460px; height: 72vh; } .hint { display:none; } .mobile-controls { display: flex; position: absolute; left: 14px; right: 14px; bottom: 14px; justify-content: space-between; pointer-events: none; } .mobile-controls button { pointer-events: auto; width: 54px; height: 54px; padding: 0; font-size: 22px; background: #233b6dcc; color: white; } }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <div class="topbar"><div class="brand">✦ Night Flight / Endless Runner</div><div class="score">SCORE <span id="score">0000</span></div></div>
+    <section class="game-wrap">
+      <canvas id="game" aria-label="Night sky jet runner game"></canvas>
+      <div class="hint">← / → to change lanes · dodge the incoming meteors</div>
+      <div class="mobile-controls"><button id="left" aria-label="Steer left">←</button><button id="right" aria-label="Steer right">→</button></div>
+      <div class="panel" id="panel"><div class="card"><h1 id="title">Night Flight</h1><p id="message">Guide your jet through the midnight skyline.</p><button id="start">Start flight</button></div></div>
+    </section>
+  </main>
+  <script>
+    const canvas = document.getElementById('game'), ctx = canvas.getContext('2d');
+    const scoreEl = document.getElementById('score'), panel = document.getElementById('panel'), title = document.getElementById('title'), message = document.getElementById('message'), start = document.getElementById('start');
+    let W, H, dpr, jet, meteors, stars, score, playing = false, last = 0, spawn = 0;
+    const resize = () => { const r = canvas.getBoundingClientRect(); dpr = Math.min(devicePixelRatio || 1, 2); W = r.width; H = r.height; canvas.width = W*dpr; canvas.height = H*dpr; ctx.setTransform(dpr,0,0,dpr,0,0); stars = Array.from({length: Math.max(80, W/7)}, () => ({x: Math.random()*W, y: Math.random()*H*.82, r: Math.random()*1.8+.3, a: Math.random()*.7+.2})); };
+    const laneX = lane => W * (.25 + lane * .25);
+    const reset = () => { jet = {x: laneX(1), y: H*.79, lane: 1}; meteors=[]; score=0; spawn=0; scoreEl.textContent='0000'; };
+    function drawSky(t) { const g=ctx.createLinearGradient(0,0,0,H); g.addColorStop(0,'#050a20'); g.addColorStop(.55,'#0b2050'); g.addColorStop(1,'#1b1740'); ctx.fillStyle=g; ctx.fillRect(0,0,W,H); ctx.fillStyle='#d9e8ff'; stars.forEach(s=>{const y=(s.y+t*.045)%H;ctx.globalAlpha=s.a*(.7+.3*Math.sin(t/700+s.x));ctx.beginPath();ctx.arc(s.x,y,s.r,0,7);ctx.fill();});ctx.globalAlpha=1;ctx.fillStyle='#ffffff18';ctx.beginPath();ctx.arc(W*.78,H*.2,58,0,7);ctx.fill();ctx.fillStyle='#ffffffaa';ctx.beginPath();ctx.arc(W*.78-8,H*.2-5,48,0,7);ctx.fill(); }
+    function drawLanes(t) { ctx.save();ctx.strokeStyle='#76c7ff20';ctx.lineWidth=2;ctx.setLineDash([12,18]);ctx.lineDashOffset=t*.15;[W*.375,W*.625].forEach(x=>{ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();});ctx.restore(); }
+    function drawJet() { ctx.save();ctx.translate(jet.x,jet.y);ctx.rotate((jet.x-laneX(jet.lane))*.004);ctx.shadowColor='#62dfff';ctx.shadowBlur=18;ctx.fillStyle='#dff8ff';ctx.beginPath();ctx.moveTo(0,-31);ctx.lineTo(10,14);ctx.lineTo(24,25);ctx.lineTo(9,23);ctx.lineTo(0,16);ctx.lineTo(-9,23);ctx.lineTo(-24,25);ctx.lineTo(-10,14);ctx.closePath();ctx.fill();ctx.shadowBlur=0;ctx.fillStyle='#63c9ef';ctx.beginPath();ctx.ellipse(0,-5,5,12,0,0,7);ctx.fill();ctx.fillStyle='#ffb45e';ctx.beginPath();ctx.moveTo(-6,18);ctx.lineTo(0,34);ctx.lineTo(6,18);ctx.fill();ctx.restore(); }
+    function drawMeteor(m) { ctx.save();ctx.translate(m.x,m.y);ctx.rotate(m.rot);ctx.shadowColor='#ff9d5b';ctx.shadowBlur=12;ctx.fillStyle='#7d3d4e';ctx.beginPath();for(let i=0;i<9;i++){const a=i*Math.PI*2/9,r=m.r*(.78+((i*37)%31)/100);ctx.lineTo(Math.cos(a)*r,Math.sin(a)*r);}ctx.closePath();ctx.fill();ctx.shadowBlur=0;ctx.fillStyle='#bd6559';ctx.beginPath();ctx.arc(-m.r*.22,-m.r*.18,m.r*.23,0,7);ctx.fill();ctx.restore(); }
+    function loop(t) { const dt=Math.min((t-last)/16.67,2);last=t;drawSky(t);drawLanes(t);if(playing){jet.x+=(laneX(jet.lane)-jet.x)*Math.min(.28*dt,1);spawn-=dt;if(spawn<=0){meteors.push({x:laneX(Math.floor(Math.random()*3)),y:-45,r:16+Math.random()*18,rot:Math.random()*7,spin:(Math.random()-.5)*.06,passed:false});spawn=34+Math.random()*29;}meteors.forEach(m=>{m.y+=(3.8+score*.05)*dt;m.rot+=m.spin*dt;});meteors=meteors.filter(m=>m.y<H+55);meteors.forEach(m=>{if(!m.passed&&m.y>jet.y+35){m.passed=true;score++;scoreEl.textContent=String(score).padStart(4,'0');}if(Math.hypot(jet.x-m.x,jet.y-m.y)<m.r+20)end();});meteors.forEach(drawMeteor);}drawJet();requestAnimationFrame(loop); }
+    function end(){if(!playing)return;playing=false;title.textContent='Flight ended';message.textContent=`You dodged ${score} meteor${score===1?'':'s'}. Ready for another run?`;start.textContent='Restart flight';panel.style.display='grid';}
+    function begin(){reset();playing=true;panel.style.display='none';last=performance.now();}
+    function changeLane(amount){if(playing)jet.lane=Math.max(0,Math.min(2,jet.lane+amount));}
+    addEventListener('resize',resize);addEventListener('keydown',e=>{if(e.code==='ArrowLeft'||e.code==='ArrowRight'){e.preventDefault();if(!e.repeat)changeLane(e.code==='ArrowLeft'?-1:1);}if(e.code==='Enter'&&!playing)begin();});start.onclick=begin;
+    document.getElementById('left').onclick=()=>changeLane(-1);document.getElementById('right').onclick=()=>changeLane(1);
+    resize(); reset(); requestAnimationFrame(loop);
+  </script>
+</body>
+</html>
