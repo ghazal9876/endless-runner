@@ -20,10 +20,13 @@
     .start.level-two { color: #fff5ff; background: #a961e8; box-shadow: 0 8px 26px #a961e844; }
     .start.level-two:hover { background: #cf9cff; }
     .details { margin-top: 22px; color: #8296c3; font-size: 12px; }
+    .sound-toggle { margin-top: 16px; border: 1px solid #7de7ff66; border-radius: 999px; padding: 8px 13px; color: #ccefff; background: #101d42bb; font: inherit; font-size: 12px; font-weight: 800; cursor: pointer; }
+    .sound-toggle:hover { background: #1b3268; }
   </style>
 </head>
 <body>
   <div class="stars"></div>
+  <audio id="menu-music" src="assets/victory-tune.ogg" loop autoplay preload="auto"></audio>
   <main class="mission">
     <div class="logo" aria-hidden="true">🚀</div>
     <p class="eyebrow">Orbital Command</p>
@@ -33,7 +36,17 @@
       <a class="start" href="level1.html">Start Level 1 <span aria-hidden="true">→</span></a>
       <a class="start level-two" href="level1.html?level=2">Start Level 2 <span aria-hidden="true">→</span></a>
     </div>
+    <button class="sound-toggle" id="sound-toggle" type="button" aria-pressed="false">Play soundtrack</button>
     <div class="details">Choose a mission · Arrow keys or touch to fly · Space or FIRE to shoot</div>
   </main>
+  <script>
+    const menuMusic=document.getElementById('menu-music'),soundToggle=document.getElementById('sound-toggle');
+    const updateSoundButton=()=>{const playing=!menuMusic.paused;soundToggle.textContent=playing?'Pause soundtrack':'Play soundtrack';soundToggle.setAttribute('aria-pressed',String(playing));};
+    const startMenuMusic=()=>menuMusic.play().then(updateSoundButton).catch(updateSoundButton);
+    document.addEventListener('pointerdown',startMenuMusic,{once:true,capture:true});
+    document.addEventListener('keydown',startMenuMusic,{once:true,capture:true});
+    soundToggle.addEventListener('click',()=>{if(menuMusic.paused)startMenuMusic();else{menuMusic.pause();updateSoundButton();}});
+    menuMusic.play().then(updateSoundButton).catch(updateSoundButton);
+  </script>
 </body>
 </html>
