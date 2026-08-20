@@ -14,8 +14,11 @@
     .eyebrow { margin: 0 0 9px; color: #a7bbec; font-size: 12px; font-weight: 800; letter-spacing: .22em; text-transform: uppercase; }
     h1 { margin: 0; font-size: clamp(46px, 10vw, 78px); letter-spacing: -.07em; line-height: .95; }
     p { max-width: 400px; margin: 18px auto 28px; color: #b8c8e9; line-height: 1.6; }
+    .levels { display: flex; justify-content: center; flex-wrap: wrap; gap: 12px; }
     .start { display: inline-flex; align-items: center; gap: 10px; padding: 14px 23px; border-radius: 999px; color: #061020; background: #79eaff; box-shadow: 0 8px 26px #42cfff44; font-weight: 900; text-decoration: none; transition: transform .2s, background .2s; }
     .start:hover { transform: translateY(-2px); background: #c7f7ff; }
+    .start.level-two { color: #fff5ff; background: #a961e8; box-shadow: 0 8px 26px #a961e844; }
+    .start.level-two:hover { background: #cf9cff; }
     .details { margin-top: 22px; color: #8296c3; font-size: 12px; }
   </style>
 </head>
@@ -26,8 +29,11 @@
     <p class="eyebrow">Orbital Command</p>
     <h1>Space<br />Mission</h1>
     <p>Launch into a dangerous deep-space route. Dodge threats, return fire, and push your mission score as far as it can go.</p>
-    <a class="start" href="level1.html">Start Level 1 <span aria-hidden="true">→</span></a>
-    <div class="details">Level 1 · Arrow keys to fly · Space to fire</div>
+    <div class="levels">
+      <a class="start" href="level1.html">Start Level 1 <span aria-hidden="true">→</span></a>
+      <a class="start level-two" href="level1.html?level=2">Start Level 2 <span aria-hidden="true">→</span></a>
+    </div>
+    <div class="details">Choose a mission · Arrow keys or touch to fly · Space or FIRE to shoot</div>
   </main>
 </body>
 </html>

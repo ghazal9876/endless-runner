@@ -18,6 +18,7 @@ This is a dependency-free browser game. `index.html` is the Space Mission landin
 - [x] Collision and game over — contact with an enemy or enemy laser ends the flight.
 - [x] Score counter — awards points for dodging enemies, late lane changes, and destroying enemies.
 - [x] Game-over screen and restart button — displays the distance score and starts a new run.
+- [x] Level 2 — Nebula Run is selectable from the landing page and keeps the three-lane flight controls with faster opening pressure.
 - [ ] Difficulty scaling — gradually increase enemy speed, frequency, and firing pressure.
 - [ ] Visual feedback — add explosion effects, hit flashes, and score popups.
 - [ ] Audio — add firing, explosion, and ambient space sound effects.
