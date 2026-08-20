@@ -28,6 +28,7 @@
   </style>
 </head>
 <body>
+  <audio id="level-music" loop preload="auto"></audio>
   <main class="shell">
     <div class="topbar"><div class="brand" id="mission-label">✦ Night Flight / Level 1</div><div class="score">SCORE <span id="score">0000</span></div></div>
     <section class="game-wrap">
@@ -39,9 +40,11 @@
     </section>
   </main>
   <script>
-    const canvas = document.getElementById('game'), ctx = canvas.getContext('2d');
-    const scoreEl = document.getElementById('score'), panel = document.getElementById('panel'), title = document.getElementById('title'), message = document.getElementById('message'), start = document.getElementById('start'), fireButton = document.getElementById('fire'), mobileTutorial = document.getElementById('mobile-tutorial'), missionLabel = document.getElementById('mission-label');
     const isLevelTwo = new URLSearchParams(location.search).get('level') === '2';
+    const canvas = document.getElementById('game'), ctx = canvas.getContext('2d'), levelMusic = document.getElementById('level-music');
+    const startLevelMusic=()=>{if(!isLevelTwo)levelMusic.play().catch(()=>{});};
+    if(!isLevelTwo){levelMusic.src='assets/level1-theme.ogg';levelMusic.load();document.addEventListener('pointerdown',startLevelMusic,{once:true,capture:true});document.addEventListener('keydown',startLevelMusic,{once:true,capture:true});startLevelMusic();}
+    const scoreEl = document.getElementById('score'), panel = document.getElementById('panel'), title = document.getElementById('title'), message = document.getElementById('message'), start = document.getElementById('start'), fireButton = document.getElementById('fire'), mobileTutorial = document.getElementById('mobile-tutorial'), missionLabel = document.getElementById('mission-label');
     if(isLevelTwo){document.title='Space Mission — Level 2';missionLabel.textContent='✦ Nebula Run / Level 2';}
     let W, H, dpr, sceneScale, jet, stars, planets, nextPlanets, comets, enemies, bolts, shots, score, playing = false, last = 0, spaceOffset = 0, planetCycle = 0, enemySpawn = 0, fireCooldown = 0, dragPointerId = null, dragLane = null, dragStartX = 0, dragJetStartX = 0, dragTargetX = null;
     setInterval(()=>{if(isLevelTwo&&playing)enemySpawn=Math.max(0,enemySpawn-18);},1000);
